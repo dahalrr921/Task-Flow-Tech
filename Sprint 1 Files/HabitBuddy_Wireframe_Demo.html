@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitBuddy Interactive Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .screen {
+            display: none; /* All screens are hidden by default */
+        }
+        .screen.active {
+            display: block; /* The active screen is shown */
+        }
+        .phone-wireframe {
+            width: 375px;
+            height: 667px;
+            border: 2px solid #333;
+            border-radius: 20px;
+            background-color: #fdfdfd;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .header, .footer {
+            flex-shrink: 0;
+            padding: 10px;
+            background-color: #e0e0e0;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        h3 {
+             color: #1a1a1a;
+        }
+        .footer {
+            border-top: 1px solid #ccc;
+            border-bottom: none;
+            justify-content: space-around;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+        .button, .clickable {
+            cursor: pointer;
+        }
+        .button {
+            display: block;
+            width: 80%;
+            padding: 12px;
+            margin: 15px auto;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+            text-decoration: none;
+            border: none;
+        }
+        .input-field {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 2px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .placeholder {
+            border: 2px dashed #ccc;
+            background-color: #f9f9f9;
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 10px;
+        }
+        .icon {
+            font-size: 24px;
+        }
+        .modal-overlay {
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+        .modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            background: white;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            text-align: center;
+            z-index: 11;
+        }
+        .list-item {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .grid-item {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress {
+            width: 60%;
+            height: 100%;
+            background-color: #4caf50;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.8em;
+            height: 1.2em;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-field.input-error {
+            border-color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Screen 1: Login -->
+    <div id="scr-01" class="screen active">
+        <div class="phone-wireframe">
+            <div class="main-content" style="text-align: center; padding-top: 50px;">
+                <div class="placeholder" style="width: 150px; height: 150px; margin: 0 auto 30px auto;">HabitBuddy Logo</div>
+                <h3 style="margin-bottom: 20px;">Welcome!</h3>
+                <label for="login-email" class="label" style="text-align: left;">Parent's Email</label>
+                <input type="email" id="login-email" class="input-field" placeholder="parent@example.com">
+                <span class="error-message" id="login-email-error"></span>
+                <label for="login-password" class="label" style="text-align: left;">Password</label>
+                <input type="password" id="login-password" class="input-field" placeholder="********">
+                <span class="error-message" id="login-password-error"></span>
+                <button class="button" onclick="handleLoginSubmit()">Login</button>
+                <p style="margin-top: 20px;">Don't have an account? <a href="#" class="clickable" onclick="showScreen('scr-01a')">Register</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 1A: Parent Registration -->
+    <div id="scr-01a" class="screen">
+        <div class="phone-wireframe">
+            <div class="header">
+                <span class="icon clickable" onclick="showScreen('scr-01')">⬅️ Back</span>
+                <h3>Create Account</h3>
+                <span></span>
+            </div>
+            <div class="main-content">
+                <label for="reg-fullname" class="label">Parent's Full Name</label>
+                <input type="text" id="reg-fullname" class="input-field" placeholder="e.g., Jane Doe">
+                <span class="error-message" id="reg-fullname-error"></span>
+                <label for="reg-email" class="label">Email Address</label>
+                <input type="email" id="reg-email" class="input-field" placeholder="parent@example.com">
+                <span class="error-message" id="reg-email-error"></span>
+                <label for="reg-password" class="label">Password</label>
+                <input type="password" id="reg-password" class="input-field" placeholder="At least 6 characters">
+                <span class="error-message" id="reg-password-error"></span>
+                <label for="reg-confirm-password" class="label">Confirm Password</label>
+                <input type="password" id="reg-confirm-password" class="input-field" placeholder="Confirm your password">
+                <span class="error-message" id="reg-confirm-password-error"></span>
+                <div style="font-size: 0.8em; margin-top: 10px; display: flex; align-items: center;"><input type="checkbox" id="reg-terms" style="margin-right: 10px;"><label for="reg-terms">I agree to the <a href="#">Terms of Service</a></label></div>
+                <span class="error-message" id="reg-terms-error"></span>
+                <button class="button" style="margin-top: 10px;" onclick="handleRegistrationSubmit()">Create Account</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Screen 2: Device Setup -->
+    <div id="scr-02" class="screen">
+        <div class="phone-wireframe">
+            <div class="main-content" style="text-align: center; padding-top: 100px;">
+                <h3>Device Setup</h3>
+                <p style="padding: 20px;">Is this the primary device your child will use?</p>
+                <button class="button" onclick="showScreen('scr-03')">Yes, Set as Child Device</button>
+                <button class="button" style="background-color: #6c757d;" onclick="showScreen('scr-10')">No, This is My Device</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Screen 3: Set Parent PIN -->
+    <div id="scr-03" class="screen">
+        <div class="phone-wireframe">
+            <div class="main-content" style="text-align: center; padding-top: 100px;">
+                <h3>Set Parent PIN</h3>
+                <p style="padding: 20px;">Create a 4-digit PIN to access the Parent Portal from this device.</p>
+                <label for="pin-setup" class="label">Enter PIN</label>
+                <input type="password" id="pin-setup" class="input-field" maxlength="4" placeholder="••••">
+                <span class="error-message" id="pin-setup-error"></span>
+                <label for="pin-confirm" class="label">Confirm PIN</label>
+                <input type="password" id="pin-confirm" class="input-field" maxlength="4" placeholder="••••">
+                <span class="error-message" id="pin-confirm-error"></span>
+                <button class="button" onclick="handlePinSetupSubmit()">Set PIN & Finish Setup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 3A: Add First Child -->
+    <div id="scr-03a" class="screen">
+        <div class="phone-wireframe">
+             <div class="header"><h3>Welcome!</h3><span></span></div>
+            <div class="main-content" style="text-align: center; padding-top: 80px;">
+                <h3>Let's Add Your First Child</h3>
+                <p style="padding: 20px;">Create a profile for your child to get started.</p>
+                <label class="label" style="text-align: left;">Child's Name</label>
+                <input type="text" id="child-name" class="input-field" placeholder="e.g., Alex">
+                <span class="error-message" id="child-name-error"></span>
+                <button class="button" onclick="handleAddChildSubmit()">Save Child & Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 4: Child Dashboard -->
+    <div id="scr-04" class="screen">
+        <div class="phone-wireframe">
+            <div class="header"><span>Hi, Alex!</span><div><span><strong>150</strong> 🪙</span><span class="icon clickable" style="margin-left: 15px;" onclick="showModal('modal-pin')">⚙️</span></div></div>
+            <div class="main-content">
+                <h3>Today's Habits</h3>
+                <div class="list-item"><div><p style="margin: 0; font-weight: bold;">Brush Teeth</p><small>2/2 Steps Done</small></div><span>✅</span></div>
+                <div class="list-item clickable" onclick="showScreen('scr-05')"><div><p style="margin: 0; font-weight: bold;">Practice Piano</p><small>1/3 Steps Done</small><div class="progress-bar"><div class="progress" style="width: 33%;"></div></div></div><span>▶️</span></div>
+                <div class="list-item"><div><p style="margin: 0; font-weight: bold;">Do Homework</p><small>0/4 Steps Done</small><div class="progress-bar"><div class="progress" style="width: 0%;"></div></div></div><span>▶️</span></div>
+                <div class="placeholder" style="margin-top: 30px;">Daily Streak: 🔥 5 Days!</div>
+            </div>
+            <div class="footer">
+                <div style="text-align: center;" class="clickable" onclick="showScreen('scr-04')"><span class="icon">🏠</span><br>Home</div>
+                <div style="text-align: center;" class="clickable" onclick="showScreen('scr-07')"><span class="icon">🎁</span><br>Rewards</div>
+                <div style="text-align: center;" class="clickable" onclick="showScreen('scr-08')"><span class="icon">⭐</span><br>Badges</div>
+            </div>
+            <!-- PIN Modal -->
+            <div id="modal-pin" class="modal-overlay">
+              <div class="modal">
+                <h3>Enter Parent PIN</h3>
+                <input type="password" id="pin-entry" class="input-field" maxlength="4" placeholder="••••" style="text-align: center; font-size: 24px;">
+                <span class="error-message" id="pin-entry-error"></span>
+                <button class="button" style="width: 100%;" onclick="checkPin()">Enter</button>
+                <a href="#" class="clickable" onclick="hideModal('modal-pin')">Cancel</a>
+              </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 4 (Complete): Child Dashboard After Completing a Habit -->
+    <div id="scr-04-complete" class="screen">
+        <div class="phone-wireframe">
+            <div class="header"><span>Hi, Alex!</span><div><span><strong>165</strong> 🪙</span><span class="icon clickable" style="margin-left: 15px;" onclick="showModal('modal-pin-2')">⚙️</span></div></div>
+            <div class="main-content">
+                <h3>Today's Habits</h3>
+                <div class="list-item"><div><p style="margin: 0; font-weight: bold;">Brush Teeth</p><small>2/2 Steps Done</small></div><span>✅</span></div>
+                <div class="list-item"><div><p style="margin: 0; font-weight: bold;">Practice Piano</p><small>3/3 Steps Done</small></div><span>✅</span></div>
+                <div class="list-item"><div><p style="margin: 0; font-weight: bold;">Do Homework</p><small>0/4 Steps Done</small><div class="progress-bar"><div class="progress" style="width: 0%;"></div></div></div><span>▶️</span></div>
+                <div class="placeholder" style="margin-top: 30px;">Daily Streak: 🔥 5 Days!</div>
+            </div>
+            <div class="footer">
+                <div style="text-align: center;" class="clickable" onclick="showScreen('scr-04-complete')"><span class="icon">🏠</span><br>Home</div>
+                <div style="text-align: center;" class="clickable" onclick="showScreen('scr-07')"><span class="icon">🎁</span><br>Rewards</div>
+                <div style="text-align: center;" class="clickable" onclick="showScreen('scr-08')"><span class="icon">⭐</span><br>Badges</div>
+            </div>
+             <!-- PIN Modal for this screen -->
+             <div id="modal-pin-2" class="modal-overlay">
+                <div class="modal">
+                  <h3>Enter Parent PIN</h3>
+                  <input type="password" id="pin-entry-2" class="input-field" maxlength="4" placeholder="••••" style="text-align: center; font-size: 24px;">
+                  <span class="error-message" id="pin-entry-error-2"></span>
+                  <button class="button" style="width: 100%;" onclick="checkPin(true)">Enter</button>
+                  <a href="#" class="clickable" onclick="hideModal('modal-pin-2')">Cancel</a>
+                </div>
+              </div>
+        </div>
+    </div>
+
+    <!-- Screen 5: Habit Detail & Steps -->
+    <div id="scr-05" class="screen">
+        <div class="phone-wireframe">
+            <div class="header"><span class="icon clickable" onclick="showScreen('scr-04')">⬅️ Back</span><h3>Practice Piano</h3><span></span></div>
+            <div class="main-content">
+                <div class="placeholder" style="height: 100px;">Habit Icon / Image</div>
+                <p>Follow these steps to complete your piano practice!</p>
+                <div class="list-item"><label>1. Warm-up with scales (Done)</label><input type="checkbox" checked disabled></div>
+                <div class="list-item"><label>2. Practice new song for 10 mins</label><input type="checkbox" onclick="showModal('modal-complete')"></div>
+                <div class="list-item"><label>3. Review old song for 5 mins</label><input type="checkbox" onclick="showScreen('scr-04-complete')"></div>
+            </div>
+            <div class="footer" style="display: block; text-align: center; border: none;"><button class="button" onclick="showScreen('scr-04-complete')">I'm All Done!</button></div>
+            <div id="modal-complete" class="modal-overlay">
+              <div class="modal">
+                <div class="placeholder" style="height: 80px;">Engaging Graphic / Animation</div>
+                <h3>Great Job!</h3><p>You earned <strong>+5</strong> 🪙 !</p>
+                <button class="button" style="width: 100%;" onclick="hideModal('modal-complete')">Awesome!</button>
+              </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 7: Reward Store -->
+    <div id="scr-07" class="screen">
+        <div class="phone-wireframe">
+            <div class="header"><h3>Reward Store</h3><span><strong>165</strong> 🪙</span></div>
+            <div class="main-content">
+                <div class="grid-container">
+                    <div class="grid-item clickable" onclick="showModal('modal-redeem')"><div class="placeholder" style="height: 60px;">Image of TV</div><p>30 Mins Screen Time</p><strong>100 🪙</strong></div>
+                    <div class="grid-item"><div class="placeholder" style="height: 60px;">Image of Ice Cream</div><p>Ice Cream Trip</p><strong>250 🪙</strong></div>
+                </div>
+            </div>
+            <div class="footer">
+                <div style="text-align: center;" class="clickable" onclick="showScreen('scr-04-complete')"><span class="icon">🏠</span><br>Home</div>
+                <div style="text-align: center;" class="clickable" onclick="showScreen('scr-07')"><span class="icon">🎁</span><br>Rewards</div>
+                <div style="text-align: center;" class="clickable" onclick="showScreen('scr-08')"><span class="icon">⭐</span><br>Badges</div>
+            </div>
+            <div id="modal-redeem" class="modal-overlay">
+              <div class="modal">
+                <h3>Redeem Reward?</h3><p>This will spend <strong>100 🪙</strong> on "30 Mins Screen Time".</p>
+                <button class="button" style="width: 100%;" onclick="hideModal('modal-redeem'); showScreen('scr-07b');">Yes, Redeem!</button>
+                <a href="#" class="clickable" onclick="hideModal('modal-redeem')">Cancel</a>
+              </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 7B: Reward Redeemed Success -->
+    <div id="scr-07b" class="screen">
+        <div class="phone-wireframe">
+            <div class="main-content" style="text-align: center; padding-top: 150px;">
+                <div class="placeholder" style="width: 150px; height: 150px; margin: 0 auto 30px auto;">🎉</div>
+                <h3>Success!</h3><p style="padding: 20px;">You've redeemed "30 Mins Screen Time". Let your parent know!</p>
+                <button class="button" onclick="showScreen('scr-04-complete')">Back to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 8: Badges Gallery -->
+    <div id="scr-08" class="screen">
+        <div class="phone-wireframe">
+            <div class="header"><h3>My Badges</h3><span></span></div>
+            <div class="main-content">
+                <div class="grid-container">
+                    <div class="grid-item"><div class="placeholder" style="height: 60px;">Badge Icon</div><p>7-Day Streak</p></div>
+                    <div class="grid-item"><div class="placeholder" style="height: 60px;">Badge Icon</div><p>Piano Master</p></div>
+                </div>
+            </div>
+            <div class="footer">
+                <div style="text-align: center;" class="clickable" onclick="showScreen('scr-04-complete')"><span class="icon">🏠</span><br>Home</div>
+                <div style="text-align: center;" class="clickable" onclick="showScreen('scr-07')"><span class="icon">🎁</span><br>Rewards</div>
+                <div style="text-align: center;" class="clickable" onclick="showScreen('scr-08')"><span class="icon">⭐</span><br>Badges</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Screen 10: Parent Dashboard -->
+    <div id="scr-10" class="screen">
+        <div class="phone-wireframe">
+            <div class="header"><h3>Parent Portal</h3><span></span></div>
+            <div class="main-content">
+                <label for="child-select" class="label">Viewing Profile For:</label>
+                <select id="child-select" class="input-field"><option>Alex (Age 8)</option></select>
+                <div class="placeholder" style="padding: 15px; margin-top: 20px;"><h4>Alex's Progress Today</h4><p>Habits Completed: 1 of 3</p></div>
+                <button class="button" onclick="showScreen('scr-11')">Manage Habits</button>
+                <button class="button" onclick="showScreen('scr-13')">Manage Rewards</button>
+            </div>
+             <div class="footer" style="display: block; text-align: center; border: none;"><button class="button" style="background-color: #dc3545;" onclick="showScreen('scr-04')">Exit to Child Mode</button></div>
+        </div>
+    </div>
+
+    <!-- Screen 11: Manage Habits -->
+    <div id="scr-11" class="screen">
+        <div class="phone-wireframe">
+            <div class="header"><span class="icon clickable" onclick="showScreen('scr-10')">⬅️ Back</span><h3>Manage Habits</h3><span></span></div>
+            <div class="main-content">
+                 <div class="list-item"><div><p>Brush Teeth</p><small>Daily</small></div><button class="clickable">Edit</button></div>
+                <div class="list-item"><div><p>Practice Piano</p><small>Mon, Wed, Fri</small></div><button class="clickable">Edit</button></div>
+                <button class="button" style="background-color: #28a745; margin-top: 30px;" onclick="showScreen('scr-12')">+ Add New Habit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 12: Create/Edit Habit -->
+    <div id="scr-12" class="screen">
+        <div class="phone-wireframe">
+            <div class="header"><span class="icon clickable" onclick="showScreen('scr-11')">⬅️ Back</span><h3>Create New Habit</h3><span></span></div>
+            <div class="main-content">
+                <label class="label">Habit Name</label><input type="text" id="habit-name" class="input-field" placeholder="e.g., Make Bed"><span class="error-message" id="habit-name-error"></span>
+                <button class="button" style="background-color: #28a745; margin-top: 30px;" onclick="handleCreateHabitSubmit()">Save Habit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 13: Manage Rewards -->
+    <div id="scr-13" class="screen">
+        <div class="phone-wireframe">
+            <div class="header"><span class="icon clickable" onclick="showScreen('scr-10')">⬅️ Back</span><h3>Manage Rewards</h3><span></span></div>
+            <div class="main-content">
+                 <div class="list-item"><div><p>30 Mins Screen Time</p><small>Cost: 100 🪙</small></div><button class="clickable">Edit</button></div>
+                <button class="button" style="background-color: #28a745; margin-top: 30px;" onclick="showScreen('scr-14')">+ Add New Reward</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 14: Create/Edit Reward -->
+    <div id="scr-14" class="screen">
+        <div class="phone-wireframe">
+            <div class="header"><span class="icon clickable" onclick="showScreen('scr-13')">⬅️ Back</span><h3>Create Reward</h3><span></span></div>
+            <div class="main-content">
+                <label class="label">Reward Name</label><input type="text" id="reward-name" class="input-field" placeholder="e.g., Family Movie Night"><span class="error-message" id="reward-name-error"></span>
+                <label class="label">Habit Coin Cost</label><input type="text" id="reward-cost" class="input-field" placeholder="e.g., 500"><span class="error-message" id="reward-cost-error"></span>
+                <button class="button" style="background-color: #28a745; margin-top: 30px;" onclick="handleCreateRewardSubmit()">Save Reward</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Navigation and Modal Functions ---
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+        function showModal(modalId) { document.getElementById(modalId).style.display = 'block'; }
+        function hideModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+
+        // --- Form Submission Handlers ---
+        function handleLoginSubmit() { if (validateLogin()) { showScreen('scr-02'); } }
+        function handleRegistrationSubmit() { if (validateRegistration()) { showScreen('scr-03a'); } }
+        function handlePinSetupSubmit() { if (validatePinSetup()) { showScreen('scr-04'); } }
+        function handleAddChildSubmit() { if (validateAddChild()) { showScreen('scr-10'); } }
+        function handleCreateHabitSubmit() { if (validateCreateHabit()) { showScreen('scr-11'); } }
+        function handleCreateRewardSubmit() { if (validateCreateReward()) { showScreen('scr-13'); } }
+        
+        // --- Validation Logic ---
+        function clearErrors(fields) {
+            fields.forEach(field => {
+                document.getElementById(field).innerHTML = '';
+                const input = document.getElementById(field.replace('-error', ''));
+                if (input) input.classList.remove('input-error');
+            });
+        }
+
+        function validateLogin() {
+            clearErrors(['login-email-error', 'login-password-error']);
+            const email = document.getElementById('login-email');
+            const password = document.getElementById('login-password');
+            let isValid = true;
+            if (password.value.trim() === '') {
+                document.getElementById('login-password-error').innerHTML = 'Password is required.';
+                password.classList.add('input-error');
+                isValid = false;
+            }
+            if (email.value.trim() === '') {
+                document.getElementById('login-email-error').innerHTML = 'Email is required.';
+                email.classList.add('input-error');
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        function validateRegistration() {
+            clearErrors(['reg-fullname-error', 'reg-email-error', 'reg-password-error', 'reg-confirm-password-error', 'reg-terms-error']);
+            const fullName = document.getElementById('reg-fullname');
+            const email = document.getElementById('reg-email');
+            const password = document.getElementById('reg-password');
+            const confirmPassword = document.getElementById('reg-confirm-password');
+            const terms = document.getElementById('reg-terms');
+            const emailRegex = /\S+@\S+\.\S+/;
+            let isValid = true;
+
+            if (fullName.value.trim() === '') {
+                document.getElementById('reg-fullname-error').innerHTML = 'Full name is required.';
+                fullName.classList.add('input-error');
+                isValid = false;
+            }
+            if (!emailRegex.test(email.value)) {
+                document.getElementById('reg-email-error').innerHTML = 'Please enter a valid email address.';
+                email.classList.add('input-error');
+                isValid = false;
+            }
+            if (password.value.length < 6) {
+                document.getElementById('reg-password-error').innerHTML = 'Password must be at least 6 characters.';
+                password.classList.add('input-error');
+                isValid = false;
+            }
+            if (password.value !== confirmPassword.value) {
+                document.getElementById('reg-confirm-password-error').innerHTML = 'Passwords do not match.';
+                confirmPassword.classList.add('input-error');
+                isValid = false;
+            }
+            if (!terms.checked) {
+                document.getElementById('reg-terms-error').innerHTML = 'You must agree to the terms.';
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        function validatePinSetup() {
+            clearErrors(['pin-setup-error', 'pin-confirm-error']);
+            const pin = document.getElementById('pin-setup');
+            const confirmPin = document.getElementById('pin-confirm');
+            let isValid = true;
+            if (pin.value.length !== 4) {
+                document.getElementById('pin-setup-error').innerHTML = 'PIN must be exactly 4 digits.';
+                pin.classList.add('input-error');
+                isValid = false;
+            }
+            if (pin.value !== confirmPin.value) {
+                document.getElementById('pin-confirm-error').innerHTML = 'PINs do not match.';
+                confirmPin.classList.add('input-error');
+                isValid = false;
+            }
+            return isValid;
+        }
+
+        function validateAddChild() {
+            clearErrors(['child-name-error']);
+            const name = document.getElementById('child-name');
+            if (name.value.trim() === '') {
+                document.getElementById('child-name-error').innerHTML = 'Child name is required.';
+                name.classList.add('input-error');
+                return false;
+            }
+            return true;
+        }
+        
+        function checkPin(isSecondModal = false) {
+            const pinId = isSecondModal ? 'pin-entry-2' : 'pin-entry';
+            const errorId = isSecondModal ? 'pin-entry-error-2' : 'pin-entry-error';
+            const modalId = isSecondModal ? 'modal-pin-2' : 'modal-pin';
+
+            clearErrors([errorId]);
+            const pinInput = document.getElementById(pinId);
+            const correctPin = '1234';
+            if (pinInput.value === correctPin) {
+                hideModal(modalId);
+                showScreen('scr-10');
+                pinInput.value = ''; // Clear after use
+            } else {
+                document.getElementById(errorId).innerHTML = 'Incorrect PIN. Please try again.';
+                pinInput.classList.add('input-error');
+            }
+        }
+
+        function validateCreateHabit() {
+            clearErrors(['habit-name-error']);
+            const name = document.getElementById('habit-name');
+            if (name.value.trim() === '') {
+                document.getElementById('habit-name-error').innerHTML = 'Habit name is required.';
+                name.classList.add('input-error');
+                return false;
+            }
+            return true;
+        }
+        
+        function validateCreateReward() {
+            clearErrors(['reward-name-error', 'reward-cost-error']);
+            const name = document.getElementById('reward-name');
+            const cost = document.getElementById('reward-cost');
+            let isValid = true;
+            if (name.value.trim() === '') {
+                document.getElementById('reward-name-error').innerHTML = 'Reward name is required.';
+                name.classList.add('input-error');
+                isValid = false;
+            }
+            if (cost.value.trim() === '' || isNaN(cost.value)) {
+                document.getElementById('reward-cost-error').innerHTML = 'Please enter a valid number for the cost.';
+                cost.classList.add('input-error');
+                isValid = false;
+            }
+            return isValid;
+        }
+    </script>
+</body>
+</html>
